@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const uuid = require('uuid');
 
-// const { v4: uuid, validate: isUuid } = require('uuid');
+const { v4: uuid, validate: isUuid } = require('uuid');
 
 const app = express();
 
@@ -27,6 +27,9 @@ app.post("/repositories", (request, response) => {
 app.put("/repositories/:id", (request, response) => {
   const { id, title, techs, url } = request.body;
   const repositoryIndex = repositories.findIndex(repository => repository.id === id);
+  if (repositoryIndex < 0) {
+    return response.status(400).json({ messagem: 'Repository not found' });
+  }
   Object.assign(repositories[repositoryIndex], { title, url, techs });
   return response.status(201).json(repositories[repositoryIndex]);
 });
@@ -34,6 +37,9 @@ app.put("/repositories/:id", (request, response) => {
 app.delete("/repositories/:id", (request, response) => {
   const { id } = request.params;
   const repositoryIndex = repositories.findIndex(repository => repository.id === id);
+  if (repositoryIndex < 0) {
+    return response.status(400).json({ messagem: 'Repository not found' });
+  }
   repositories.splice(repositoryIndex, 1);
 
   return response.status(204);
@@ -42,8 +48,10 @@ app.delete("/repositories/:id", (request, response) => {
 app.post("/repositories/:id/like", (request, response) => {
   const { id } = request.params;
   const repositoryIndex = repositories.findIndex(repository => repository.id === id);
-  let likes = repositories[repositoryIndex].likes;
-  likes+=1;
+  if (repositoryIndex < 0) {
+    return response.status(400).json({ messagem: 'Repository not found' });
+  }
+  const likes = repositories[repositoryIndex].likes + 1;
   Object.assign(repositories[repositoryIndex], { likes });
   return response.status(201).json(repositories[repositoryIndex]);
 });
