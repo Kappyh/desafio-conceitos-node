@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const uuid = require('uuid');
 
 const { v4: uuid, validate: isUuid } = require('uuid');
 
@@ -21,16 +20,17 @@ app.post("/repositories", (request, response) => {
 
   repositories.push(repository);
 
-  return response.status(203).json(repository);
+  return response.json(repository);
 });
 
 app.put("/repositories/:id", (request, response) => {
-  const { id, title, techs, url } = request.body;
+  const { title, techs, url } = request.body;
+  const { id }  = request.params;
   const repositoryIndex = repositories.findIndex(repository => repository.id === id);
   if (repositoryIndex < 0) {
     return response.status(400).json({ messagem: 'Repository not found' });
   }
-  Object.assign(repositories[repositoryIndex], { title, url, techs });
+  repositories[repositoryIndex] = Object.assign(repositories[repositoryIndex], { title, url, techs });
   return response.status(201).json(repositories[repositoryIndex]);
 });
 
@@ -42,7 +42,7 @@ app.delete("/repositories/:id", (request, response) => {
   }
   repositories.splice(repositoryIndex, 1);
 
-  return response.status(204);
+  return response.status(204).send();
 });
 
 app.post("/repositories/:id/like", (request, response) => {
